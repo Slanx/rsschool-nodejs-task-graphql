@@ -3,7 +3,9 @@ import {
   GraphQLString,
   GraphQLNonNull,
   GraphQLID,
+  GraphQLInt,
 } from 'graphql';
+import { MemberType } from './memberType';
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
@@ -19,7 +21,7 @@ export const ProfileType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     birthday: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLInt),
     },
     country: {
       type: new GraphQLNonNull(GraphQLString),
@@ -35,6 +37,15 @@ export const ProfileType = new GraphQLObjectType({
     },
     userId: {
       type: GraphQLID,
+    },
+    memberTypes: {
+      type: MemberType,
+      resolve(parents, args, context) {
+        return context.db.memberTypes.findOne({
+          key: 'id',
+          equals: parents.memberTypeId,
+        });
+      },
     },
   }),
 });

@@ -79,7 +79,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
 
       const subcribedUsers = await fastify.db.users.findMany({
         key: 'subscribedToUserIds',
-        equals: [request.params.id],
+        inArray: request.params.id,
       });
 
       for await (const user of subcribedUsers) {

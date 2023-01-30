@@ -1,8 +1,8 @@
 import {
   GraphQLObjectType,
-  GraphQLString,
   GraphQLNonNull,
   GraphQLID,
+  GraphQLInt,
 } from 'graphql';
 
 export const MemberType = new GraphQLObjectType({
@@ -11,14 +11,11 @@ export const MemberType = new GraphQLObjectType({
     id: {
       type: GraphQLID,
     },
-    title: {
-      type: new GraphQLNonNull(GraphQLString),
+    monthPostsLimit: {
+      type: new GraphQLNonNull(GraphQLInt),
     },
-    content: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    userId: {
-      type: GraphQLID,
+    discount: {
+      type: new GraphQLNonNull(GraphQLInt),
     },
   }),
 });

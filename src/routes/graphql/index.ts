@@ -6,11 +6,14 @@ import {
   GraphQLList,
   GraphQLID,
 } from 'graphql';
+import { validate } from 'graphql/validation';
+import { parse, Source } from 'graphql/language';
+import depthLimit = require('graphql-depth-limit');
 import { graphqlBodySchema } from './schema';
 import { MemberType } from './types/memberType';
 import { PostType } from './types/postType';
 import { ProfileType } from './types/profileType';
-import { UserType } from './types/userType';
+import { UserCreateInput, UserType } from './types/userType';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -74,7 +77,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
               return fastify.db.posts.findOne({ key: 'id', equals: args.id });
             },
           },
-          MemberType: {
+          memberType: {
             type: MemberType,
             args: { id: { type: GraphQLID } },
             resolve(parents, args) {
@@ -87,7 +90,29 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         },
       });
 
-      const schema = new GraphQLSchema({ query: RootQuery });
+      const RootMutation = new GraphQLObjectType({
+        name: 'mutation',
+        fields: () => ({
+          createUser: {
+            type: UserType,
+            args: { user: { type: UserCreateInput } },
+            resolve: async (_, args) => {
+              return await fastify.db.users.create(args.user);
+            },
+          },
+        }),
+      });
+
+      const schema = new GraphQLSchema({
+        query: RootQuery,
+        mutation: RootMutation,
+      });
+
+      const source = new Source(String(request.body.query));
+      const ast = parse(source);
+      validate(schema, ast, [depthLimit(6)]).forEach((error) => {
+        throw error;
+      });
 
       return graphql({
         schema,
